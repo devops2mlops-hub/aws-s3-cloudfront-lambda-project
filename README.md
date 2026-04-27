@@ -16,7 +16,7 @@ This project demonstrates how to build and deploy a **production-grade full stac
 
 ## 🧱 Architecture Diagram
 
-![Architecture](architecture.png)
+<img width="1358" height="679" alt="NDgsmKkvf7OtHYh7Grmq6Z2XadSRDUOTWD-vD21efbRrkSI6_TklxgygUQ3chB5BjzE1Y-xyDD8IdPCVCDgg8aNUP0XjGE7XSCC_DwMYRwQVCGDvGVtOVVd5m3H1KdTEcPhXiTJTu_kmxo_3GnObJnqmpugbLFJsZUJzydfQ_X_RiPHvY7KvlT69Ov3qtlbh" src="https://github.com/user-attachments/assets/ab45799d-aa61-4be0-9c84-ac47f4cf49ea" />
 
 ---
 
@@ -150,7 +150,7 @@ https://api.yourdomain.com
 
 Rohith
 
-<img width="1358" height="679" alt="NDgsmKkvf7OtHYh7Grmq6Z2XadSRDUOTWD-vD21efbRrkSI6_TklxgygUQ3chB5BjzE1Y-xyDD8IdPCVCDgg8aNUP0XjGE7XSCC_DwMYRwQVCGDvGVtOVVd5m3H1KdTEcPhXiTJTu_kmxo_3GnObJnqmpugbLFJsZUJzydfQ_X_RiPHvY7KvlT69Ov3qtlbh" src="https://github.com/user-attachments/assets/ab45799d-aa61-4be0-9c84-ac47f4cf49ea" />
+
 
 
 ---
