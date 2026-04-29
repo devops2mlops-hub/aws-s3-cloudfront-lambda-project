@@ -61,12 +61,68 @@ DynamoDB → EventBridge → Lambda → SNS → Email
 Example:
 
 ```json
-{
-  "product_id": "P001",
-  "product_name": "Rice Bag",
-  "stock": 5,
-  "threshold": 10
-}
+[
+  {
+    "product_id": "P001",
+    "product_name": "Rice Bag",
+    "stock": 5,
+    "threshold": 10
+  },
+  {
+    "product_id": "P002",
+    "product_name": "Wheat Flour",
+    "stock": 20,
+    "threshold": 15
+  },
+  {
+    "product_id": "P003",
+    "product_name": "Cooking Oil",
+    "stock": 8,
+    "threshold": 12
+  },
+  {
+    "product_id": "P004",
+    "product_name": "Milk Pack",
+    "stock": 30,
+    "threshold": 25
+  },
+  {
+    "product_id": "P005",
+    "product_name": "Sugar",
+    "stock": 3,
+    "threshold": 10
+  },
+  {
+    "product_id": "P006",
+    "product_name": "Salt",
+    "stock": 50,
+    "threshold": 20
+  },
+  {
+    "product_id": "P007",
+    "product_name": "Tea Powder",
+    "stock": 6,
+    "threshold": 10
+  },
+  {
+    "product_id": "P008",
+    "product_name": "Coffee Powder",
+    "stock": 18,
+    "threshold": 15
+  },
+  {
+    "product_id": "P009",
+    "product_name": "Biscuits Pack",
+    "stock": 2,
+    "threshold": 8
+  },
+  {
+    "product_id": "P010",
+    "product_name": "Vegetable Oil",
+    "stock": 25,
+    "threshold": 20
+  }
+]
 ```
 
 ---
