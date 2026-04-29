@@ -35,6 +35,8 @@ This system automates stock monitoring using AWS:
 ## 🏗️ Architecture
 
 DynamoDB → EventBridge → Lambda → SNS → Email
+![Uploading dd13d192-8e64-4659-86b7-565e4d64ffcb.png…]()
+
 
 ---
 
