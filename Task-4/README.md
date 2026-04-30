@@ -2,238 +2,129 @@
 
 ![AWS](https://img.shields.io/badge/AWS-S3-orange?logo=amazonaws)
 ![Linux](https://img.shields.io/badge/Linux-Ubuntu-yellow?logo=linux)
-![Automation](https://img.shields.io/badge/Automation-Cron-blue)
-![Logging](https://img.shields.io/badge/Logs-Logrotate-green)
+![Automation](https://img.shields.io/badge/Cron-Automation-blue)
+![Logging](https://img.shields.io/badge/Logrotate-Enabled-green)
 
 ---
 
 ## 📌 Project Overview
 
-This project demonstrates a **complete log management system** using:
+This project implements an automated **log management system**:
 
-* Log generation via Python application
-* Log rotation using Linux `logrotate`
-* Automated upload of rotated logs to **Amazon S3**
-* Scheduled execution using `cron`
+* Python app generates logs
+* Logrotate rotates & compresses logs
+* Cron job triggers upload script
+* Logs are uploaded to Amazon S3
+* Local logs are cleaned automatically
+
+---
+
+## 📁 Project Structure
+
+```bash
+log-rotate-project/
+│
+├── app/
+│   └── app.py
+│
+├── scripts/
+│   └── upload_to_s3.sh
+│
+├── config/
+│   └── logrotate_myapp.conf
+│
+├── docs/
+│   └── Log-Rotate-Setup.docx
+│
+├── README.md
+```
 
 ---
 
 ## 🧱 Architecture Flow
 
-```id="flow1"
-Application → Log Files → Logrotate → Compressed Logs → Cron Job → S3 Upload → Cleanup
+```text
+Python App → Log File → Logrotate → Compressed Logs → Cron → S3 Upload → Cleanup
 ```
 
 ---
 
-## 📁 Log Directory Setup
+## ⚙️ Setup Steps
 
-```bash id="cmd1"
+### 1️⃣ Create Log Directory
+
+```bash
 sudo mkdir -p /var/log/myapp
-sudo chown root:root /var/log/myapp
 sudo chmod 755 /var/log/myapp
 ```
 
 ---
 
-## 🐍 Sample Logging Application
+### 2️⃣ Run Python App
 
-```python id="code1"
-import logging
-import time
-
-logging.basicConfig(
-    filename='/var/log/myapp/app.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-while True:
-    logging.info("This is a sample log message")
-    time.sleep(2)
+```bash
+nohup python3 app/app.py > /var/log/myapp/app.log 2>&1 &
 ```
 
 ---
 
-## ▶️ Run Application in Background
+### 3️⃣ Install Logrotate
 
-```bash id="cmd2"
-nohup python3 app.py > /var/log/myapp/app.log 2>&1 &
-```
-
-Verify:
-
-```bash id="cmd3"
-ps aux | grep app.py
-tail -f /var/log/myapp/app.log
-```
-
----
-
-## 🔧 Install Logrotate
-
-```bash id="cmd4"
+```bash
 sudo apt update
 sudo apt install logrotate -y
 ```
 
 ---
 
-## ⚙️ Configure Logrotate
+### 4️⃣ Configure Logrotate
 
-Create config file:
-
-```bash id="cmd5"
-sudo nano /etc/logrotate.d/myapp
-```
-
-```bash id="code2"
-/var/log/myapp/*.log {
-    size 1k
-    rotate 5
-    compress
-    missingok
-    notifempty
-    create 0644 root root
-}
+```bash
+sudo cp config/logrotate_myapp.conf /etc/logrotate.d/myapp
 ```
 
 ---
 
-## 🧪 Test Log Rotation
+### 5️⃣ Test Rotation
 
-```bash id="cmd6"
+```bash
 sudo logrotate -f /etc/logrotate.d/myapp
-ls /var/log/myapp
-```
-
-Expected:
-
-```id="exp1"
-app.log
-app.log.1.gz
 ```
 
 ---
 
-## ☁️ AWS S3 Setup
+### 6️⃣ Setup AWS S3
 
-Create an S3 bucket:
-
-```id="bucket1"
-myapp-logs-bucket-123
-```
+* Create bucket: `myapp-logs-bucket-123`
+* Attach IAM role to EC2
 
 ---
 
-## 🔐 IAM Role Policy
+### 7️⃣ Install AWS CLI
 
-Attach to EC2:
-
-```json id="json1"
-{
-  "Effect": "Allow",
-  "Action": [
-    "s3:PutObject",
-    "s3:ListBucket"
-  ],
-  "Resource": [
-    "arn:aws:s3:::myapp-logs-bucket-123",
-    "arn:aws:s3:::myapp-logs-bucket-123/*"
-  ]
-}
-```
-
----
-
-## 🛠️ Install AWS CLI
-
-```bash id="cmd7"
+```bash
 sudo apt install awscli -y
-aws s3 ls
 ```
 
 ---
 
-## 📤 Upload Script
+### 8️⃣ Setup Upload Script
 
-```bash id="cmd8"
-sudo nano /usr/local/bin/upload_to_s3.sh
-```
-
-```bash id="code3"
-#!/bin/bash
-
-BUCKET="myapp-logs-bucket-123"
-LOG_DIR="/var/log/myapp"
-
-for file in $LOG_DIR/*.gz
-do
-    [ -e "$file" ] || continue
-
-    aws s3 cp "$file" s3://$BUCKET/$(hostname)/$(date +%F)/$(basename $file)
-
-    if [ $? -eq 0 ]; then
-        rm -f "$file"
-    fi
-done
-```
-
----
-
-## 🔑 Set Permissions
-
-```bash id="cmd9"
+```bash
+sudo cp scripts/upload_to_s3.sh /usr/local/bin/
 sudo chmod +x /usr/local/bin/upload_to_s3.sh
-sudo chown root:root /usr/local/bin/upload_to_s3.sh
 ```
 
 ---
 
-## 🧪 Test Upload
+### 9️⃣ Setup Cron Job
 
-```bash id="cmd10"
-/usr/local/bin/upload_to_s3.sh
-aws s3 ls s3://myapp-logs-bucket-123
-```
-
----
-
-## ⏰ Setup Cron Job
-
-```bash id="cmd11"
+```bash
 sudo crontab -e
 ```
 
-Add:
-
-```bash id="code4"
+```bash
 */5 * * * * /usr/local/bin/upload_to_s3.sh >> /var/log/myapp/upload.log 2>&1
-```
-
----
-
-## 🔍 Verify Cron
-
-```bash id="cmd12"
-sudo crontab -l
-tail -f /var/log/myapp/upload.log
-```
-
----
-
-## 🔄 Final Workflow
-
-```id="flow2"
-App running → logs generated
-      ↓
-logrotate rotates & compresses
-      ↓
-cron runs every 5 minutes
-      ↓
-script uploads to S3
-      ↓
-local logs removed
 ```
 
 ---
@@ -241,17 +132,18 @@ local logs removed
 ## 🎯 Key Features
 
 * Automated log rotation
-* Compressed log storage
+* Log compression
 * Scheduled S3 uploads
-* Cleanup of local logs
+* Log cleanup
 * Fully automated pipeline
 
 ---
 
-## 📄 Reference Document
+## 📄 Documentation
 
-Detailed setup available here:
+Detailed steps available in:
 
+* `docs/Log-Rotate-Setup.docx`
 
 ---
 
