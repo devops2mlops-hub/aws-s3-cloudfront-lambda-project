@@ -1,0 +1,12 @@
+version: 1
+frontend:
+  phases:
+    build:
+      commands:
+        - echo "Static site"
+  artifacts:
+    baseDirectory: Code
+    files:
+      - '**/*'
+  cache:
+    paths: []
