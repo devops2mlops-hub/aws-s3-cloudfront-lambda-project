@@ -40,7 +40,7 @@ S3
 
 Detailed step-by-step guide is available here:
 
-👉 [docs/doc.md](docs/doc.md)
+👉 👉 [Secure VPC Architecture Guide](docs/Secure%20VPC%20Architecture%20with%20Bastion%20Host%20and%20Secrets%20Manager%20Integration.docx)
 
 ---
 
