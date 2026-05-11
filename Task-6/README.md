@@ -23,6 +23,8 @@ The setup includes:
 ---
 
 # 🏗️ Architecture Diagram
+<img width="1693" height="929" alt="image" src="https://github.com/user-attachments/assets/8e3d58b4-0887-42fd-a1c0-6d7b4c994459" />
+
 
 ```text
                 ┌─────────────────────────────┐
