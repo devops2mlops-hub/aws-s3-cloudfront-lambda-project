@@ -233,9 +233,7 @@ project/
 │
 ├── docs/
 │   └── 8.Multi-Region Transit Gateway Setup.docx
-│
-└── architecture/
-    └── multi-region-tgw-diagram.png
+
 ```
 
 ---
