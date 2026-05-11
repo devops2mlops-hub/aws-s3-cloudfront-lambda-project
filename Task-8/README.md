@@ -26,6 +26,8 @@ using a Full Mesh Transit Gateway Peering Architecture.
 Since Transit Gateway Peering is NOT transitive, all TGWs are interconnected manually.
 
 🏗️ Architecture Diagram
+
+
                                  ┌──────────────────────────┐
                                  │     AWS CLOUD            │
                                  └──────────────────────────┘
