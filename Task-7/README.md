@@ -1,59 +1,169 @@
 # Cross-Account EC2 → S3 Access in AWS
+![AWS](https://img.shields.io/badge/AWS-S3%20Cross%20Account-orange?style=for-the-badge&logo=amazonaws)
+![Service](https://img.shields.io/badge/Service-Amazon%20S3-blue?style=for-the-badge)
+![Compute](https://img.shields.io/badge/Compute-EC2-yellow?style=for-the-badge&logo=amazon-ec2)
+![Security](https://img.shields.io/badge/Security-IAM-red?style=for-the-badge)
+![Access](https://img.shields.io/badge/Access-Cross%20Account-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
+![Level](https://img.shields.io/badge/Level-Intermediate-yellow?style=for-the-badge)
+## Architecture Diagram with Labels
 
-## Project Overview
+# CASE 1 — Public Bucket Access
 
-This project demonstrates how an EC2 instance or IAM User from one AWS account can access an S3 bucket located in another AWS account.
+```text
+┌──────────────────────────────────────────────┐
+│              AWS ACCOUNT A                  │
+│                                              │
+│  ┌──────────────────────────────────────┐    │
+│  │            EC2 INSTANCE              │    │
+│  │                                      │    │
+│  │  AWS CLI Commands                    │    │
+│  │  aws s3 ls                           │    │
+│  │  aws s3 cp                           │    │
+│  └──────────────────────────────────────┘    │
+└──────────────────────────────────────────────┘
+                     │
+                     │ Public Internet Access
+                     │
+                     ▼
+┌──────────────────────────────────────────────┐
+│              AWS ACCOUNT B                  │
+│                                              │
+│  ┌──────────────────────────────────────┐    │
+│  │          PUBLIC S3 BUCKET            │    │
+│  │                                      │    │
+│  │  Bucket Name: portfolio-rohith       │    │
+│  │                                      │    │
+│  │  Permissions:                        │    │
+│  │  ✅ s3:GetObject                     │    │
+│  │  ✅ s3:ListBucket                    │    │
+│  │  ❌ Public Upload                    │    │
+│  └──────────────────────────────────────┘    │
+└──────────────────────────────────────────────┘
+```
 
-The implementation covers three different scenarios:
+---
+
+# CASE 2 — Private Bucket Access using IAM Role
+
+```text
+┌──────────────────────────────────────────────┐
+│              AWS ACCOUNT A                  │
+│                                              │
+│  ┌──────────────────────────────────────┐    │
+│  │            EC2 INSTANCE              │    │
+│  │                                      │    │
+│  │  Attached IAM Role:                  │    │
+│  │  ec2-s3-FACcess                      │    │
+│  │                                      │    │
+│  │  Temporary Credentials via STS       │    │
+│  └──────────────────────────────────────┘    │
+└──────────────────────────────────────────────┘
+                     │
+                     │ Cross-Account IAM Access
+                     │
+                     ▼
+┌──────────────────────────────────────────────┐
+│              AWS ACCOUNT B                  │
+│                                              │
+│  ┌──────────────────────────────────────┐    │
+│  │         PRIVATE S3 BUCKET            │    │
+│  │                                      │    │
+│  │  Bucket Policy Allows:               │    │
+│  │  IAM Role ARN                        │    │
+│  │                                      │    │
+│  │  Allowed Actions:                    │    │
+│  │  ✅ s3:GetObject                     │    │
+│  │  ✅ s3:PutObject                     │    │
+│  │  ✅ s3:ListBucket                    │    │
+│  └──────────────────────────────────────┘    │
+└──────────────────────────────────────────────┘
+```
+
+---
+
+# CASE 3 — Private Bucket Access using IAM User
+
+```text
+┌──────────────────────────────────────────────┐
+│              AWS ACCOUNT A                  │
+│                                              │
+│  ┌──────────────────────────────────────┐    │
+│  │              IAM USER                │    │
+│  │                                      │    │
+│  │  User Name: New-user                 │    │
+│  │                                      │    │
+│  │  AWS CLI Credentials                 │    │
+│  │  Access Key + Secret Key             │    │
+│  └──────────────────────────────────────┘    │
+└──────────────────────────────────────────────┘
+                     │
+                     │ Cross-Account Access
+                     │
+                     ▼
+┌──────────────────────────────────────────────┐
+│              AWS ACCOUNT B                  │
+│                                              │
+│  ┌──────────────────────────────────────┐    │
+│  │         PRIVATE S3 BUCKET            │    │
+│  │                                      │    │
+│  │  Bucket Policy Allows:               │    │
+│  │  IAM User ARN                        │    │
+│  │                                      │    │
+│  │  Allowed Actions:                    │    │
+│  │  ✅ s3:GetObject                     │    │
+│  │  ✅ s3:PutObject                     │    │
+│  │  ✅ s3:ListBucket                    │    │
+│  └──────────────────────────────────────┘    │
+└──────────────────────────────────────────────┘
+```
+
+---
+
+# Project Overview
+
+This project demonstrates how resources from one AWS account can securely access Amazon S3 buckets located in another AWS account.
+
+The project covers:
 
 1. Public S3 Bucket Access
-2. Private S3 Bucket Access using IAM Role (Recommended)
+2. Private S3 Bucket Access using IAM Role
 3. Private S3 Bucket Access using IAM User
 
 ---
 
-# Architecture Overview
+# AWS Services Used
 
-AWS Account A contains:
-- EC2 Instance
-- IAM Role / IAM User
-
-AWS Account B contains:
-- S3 Bucket
-
-Cross-account permissions are controlled using:
-- Bucket Policies
-- IAM Policies
+- Amazon EC2
+- Amazon S3
 - IAM Roles
-- Access Keys
+- IAM Policies
+- Bucket Policies
+- AWS CLI
 
 ---
 
-# CASE 1 — Public S3 Bucket Access
+# CASE 1 — Access PUBLIC S3 Bucket
 
 ## Objective
 
 Allow EC2 in Account A to access a PUBLIC S3 bucket in Account B.
 
-## Architecture
-
-EC2 (Account A)
-        |
- Public Internet
-        |
-Public S3 Bucket (Account B)
-
 ---
 
 ## Step 1 — Create S3 Bucket
 
-Go to:
+Navigate to:
 
+```text
 S3 → Create Bucket
+```
 
-Example:
+Example bucket name:
 
+```text
 portfolio-rohith
+```
 
 Upload sample files.
 
@@ -61,12 +171,17 @@ Upload sample files.
 
 ## Step 2 — Disable Block Public Access
 
-Go to:
+Navigate to:
 
+```text
 Bucket → Permissions
+```
 
 Disable:
-- Block all public access
+
+```text
+Block all public access
+```
 
 Save changes.
 
@@ -93,11 +208,11 @@ Save changes.
     }
   ]
 }
-````
+```
 
 ---
 
-## Step 4 — Test from EC2
+## Step 4 — Access from EC2
 
 ### List Bucket
 
@@ -115,17 +230,15 @@ aws s3 cp s3://portfolio-rohith/test.txt . --no-sign-request
 
 ## Important Notes
 
-### Public Bucket Access
+### Public Bucket Permissions
 
-✅ Read Access
+✅ Read Access  
+✅ List Access  
 ❌ Upload Access normally blocked
-
-Reason:
-Public upload is insecure.
 
 ---
 
-# CASE 2 — Private Bucket Access using IAM Role (Recommended)
+# CASE 2 — Access PRIVATE Bucket using IAM Role
 
 ## Objective
 
@@ -133,26 +246,18 @@ Allow EC2 instance in Account A to securely access private S3 bucket in Account 
 
 ---
 
-## Architecture
-
-EC2 (Account A)
-|
-IAM Role
-|
-Private S3 Bucket (Account B)
-
----
-
 ## Step 1 — Create IAM Role
 
-Go to:
+Navigate to:
 
+```text
 IAM → Roles → Create Role
+```
 
 Choose:
 
-* AWS Service
-* EC2
+- AWS Service
+- EC2
 
 ---
 
@@ -160,29 +265,39 @@ Choose:
 
 Attach:
 
+```text
 AmazonS3ReadOnlyAccess
+```
 
-OR create custom S3 policy.
+OR create custom policy.
 
 Example role name:
 
+```text
 ec2-s3-FACcess
+```
 
 ---
 
 ## Step 3 — Attach Role to EC2
 
-Go to:
+Navigate to:
 
+```text
 EC2 → Instances
+```
 
 Select instance:
 
+```text
 Actions → Security → Modify IAM Role
+```
 
 Attach:
 
-* ec2-s3-FACcess
+```text
+ec2-s3-FACcess
+```
 
 Save changes.
 
@@ -235,12 +350,6 @@ aws sts get-caller-identity
 aws s3 ls s3://portfolio-rohith
 ```
 
-### Download File
-
-```bash
-aws s3 cp s3://portfolio-rohith/test.txt .
-```
-
 ### Upload File
 
 ```bash
@@ -248,9 +357,15 @@ echo "hello" > test.txt
 aws s3 cp test.txt s3://portfolio-rohith/
 ```
 
+### Download File
+
+```bash
+aws s3 cp s3://portfolio-rohith/test.txt .
+```
+
 ---
 
-# CASE 3 — IAM User Accessing Private S3 Bucket
+# CASE 3 — Access PRIVATE Bucket using IAM User
 
 ## Objective
 
@@ -258,44 +373,39 @@ Allow IAM User from Account A to access private S3 bucket in Account B.
 
 ---
 
-## Architecture
-
-IAM User (Account A)
-|
-AWS CLI Credentials
-|
-Private S3 Bucket (Account B)
-
----
-
 ## Step 1 — Create IAM User
 
-Go to:
+Navigate to:
 
+```text
 IAM → Users → Create User
+```
 
-Example:
+Example username:
 
-* New-user
+```text
+New-user
+```
 
 Enable:
 
-* Programmatic Access
+```text
+Programmatic Access
+```
 
 ---
 
 ## Step 2 — Create Access Keys
 
-Go to:
+Navigate to:
 
+```text
 IAM → Users → Security Credentials
+```
 
 Create:
-
-* Access Key ID
-* Secret Access Key
-
-Save credentials securely.
+- Access Key ID
+- Secret Access Key
 
 ---
 
@@ -367,10 +477,9 @@ aws configure
 ```
 
 Provide:
-
-* Access Key
-* Secret Key
-* Region
+- Access Key
+- Secret Key
+- Region
 
 ---
 
@@ -382,24 +491,22 @@ aws sts get-caller-identity
 
 ---
 
-## Step 7 — List Bucket
+## Step 7 — Access Bucket
+
+### List Bucket
 
 ```bash
 aws s3 ls s3://portfolio-rohith
 ```
 
----
-
-## Step 8 — Upload File
+### Upload File
 
 ```bash
 echo "hello" > test.txt
 aws s3 cp test.txt s3://portfolio-rohith/
 ```
 
----
-
-## Step 9 — Download File
+### Download File
 
 ```bash
 aws s3 cp s3://portfolio-rohith/test.txt .
@@ -407,120 +514,176 @@ aws s3 cp s3://portfolio-rohith/test.txt .
 
 ---
 
+# Important Configuration Changes
+
+## Replace Bucket Name
+
+Replace:
+
+```text
+portfolio-rohith
+```
+
+with your bucket name.
+
+Example:
+
+```text
+arn:aws:s3:::your-bucket-name
+arn:aws:s3:::your-bucket-name/*
+```
+
+---
+
+## Replace AWS Account ID
+
+Replace:
+
+```text
+489449993146
+```
+
+with your AWS Account ID.
+
+Example:
+
+```text
+arn:aws:iam::<YOUR-ACCOUNT-ID>:role/ec2-s3-FACcess
+```
+
+---
+
+## Replace IAM Role Name
+
+Replace:
+
+```text
+ec2-s3-FACcess
+```
+
+with your IAM Role name.
+
+Example:
+
+```text
+arn:aws:iam::<ACCOUNT-ID>:role/<YOUR-ROLE-NAME>
+```
+
+---
+
+## Replace IAM User Name
+
+Replace:
+
+```text
+New-user
+```
+
+with your IAM User name.
+
+Example:
+
+```text
+arn:aws:iam::<ACCOUNT-ID>:user/<YOUR-USER-NAME>
+```
+
+---
+
+## Replace File Name
+
+Replace:
+
+```text
+test.txt
+```
+
+with your desired filename.
+
+---
+
+# AWS CLI Requirement
+
+Install AWS CLI on:
+- EC2 Instance
+- Local Machine
+
+Verify installation:
+
+```bash
+aws --version
+```
+
+---
+
+# Required Permissions
+
+## IAM Role Permissions
+
+- s3:ListBucket
+- s3:GetObject
+- s3:PutObject
+
+## IAM User Permissions
+
+- s3:GetBucketLocation
+- s3:ListBucket
+- s3:GetObject
+- s3:PutObject
+
+---
+
+# Common Errors
+
+## AccessDenied
+
+Possible reasons:
+- Wrong bucket policy
+- Wrong IAM permissions
+- Incorrect ARN
+- IAM role not attached
+
+---
+
+## Unable to Locate Credentials
+
+Possible reasons:
+- AWS CLI not configured
+- Access keys missing
+- IAM role not attached
+
+---
+
+## NoSuchBucket
+
+Possible reasons:
+- Incorrect bucket name
+- Wrong region
+
+---
+
 # Security Best Practices
 
-## Recommended Approach
+## Recommended Method
 
-✅ IAM Role Method
+✅ IAM Role Access
 
 Reasons:
-
-* Temporary credentials
-* No hardcoded access keys
-* More secure
-* AWS recommended
+- Uses temporary credentials
+- No hardcoded access keys
+- More secure
+- AWS recommended
 
 ---
 
 # Comparison Table
 
-| Feature        | Public Bucket | IAM Role  | IAM User    |
-| -------------- | ------------- | --------- | ----------- |
-| IAM Required   | No            | Yes       | Yes         |
-| Security       | Low           | High      | Medium      |
-| Upload Allowed | Usually No    | Yes       | Yes         |
-| Credentials    | None          | Temporary | Access Keys |
-| Recommended    | No            | Yes       | Limited Use |
-
----
-
-# AWS Services Used
-
-* Amazon EC2
-* Amazon S3
-* IAM Roles
-* IAM Policies
-* Bucket Policies
-* AWS CLI
-
----
-
-# Author
-
-Rohith
-
-````
-
----
-
-# Architecture Diagram Ideas
-
-## CASE 1 — Public Bucket
-
-```text
-+------------------------+
-| AWS Account A          |
-|                        |
-|  EC2 Instance          |
-+-----------+------------+
-            |
-            | Public Internet
-            |
-+-----------v------------+
-| AWS Account B          |
-|                        |
-| Public S3 Bucket       |
-| portfolio-rohith       |
-+------------------------+
-````
-
----
-
-## CASE 2 — IAM Role Access
-
-```text
-+------------------------+
-| AWS Account A          |
-|                        |
-| EC2 Instance           |
-|     |                  |
-| IAM Role Attached      |
-+-----------+------------+
-            |
-            | Cross Account Access
-            |
-+-----------v------------+
-| AWS Account B          |
-|                        |
-| Private S3 Bucket      |
-| Bucket Policy Allowing |
-| IAM Role ARN           |
-+------------------------+
-```
-
----
-
-## CASE 3 — IAM User Access
-
-```text
-+------------------------+
-| AWS Account A          |
-|                        |
-| IAM User               |
-| Access Keys            |
-| AWS CLI                |
-+-----------+------------+
-            |
-            | Cross Account Access
-            |
-+-----------v------------+
-| AWS Account B          |
-|                        |
-| Private S3 Bucket      |
-| Bucket Policy Allowing |
-| IAM User ARN           |
-+------------------------+
-```
+| Feature | Public Bucket | IAM Role | IAM User |
+|---|---|---|---|
+| IAM Required | No | Yes | Yes |
+| Security | Low | High | Medium |
+| Upload Allowed | Usually No | Yes | Yes |
+| Credentials | None | Temporary | Access Keys |
+| Recommended | No | Yes | Limited Use |
 
 ---
 
@@ -542,3 +705,9 @@ project/
     ├── iam-role-policy.json
     └── iam-user-policy.json
 ```
+
+---
+
+# Author
+
+Rohith
