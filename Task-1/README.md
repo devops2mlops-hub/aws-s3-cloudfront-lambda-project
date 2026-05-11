@@ -1,4 +1,4 @@
-# 🚀 AWS Full Stack Deployment (S3 + CloudFront + Lambda + API Gateway)
+# 🚀 AWS Full Stack Deployment (S3 + CloudFront + Lambda + API Gateway) 
 
 ![AWS](https://img.shields.io/badge/AWS-Cloud-orange)
 ![Serverless](https://img.shields.io/badge/Architecture-Serverless-blue)
